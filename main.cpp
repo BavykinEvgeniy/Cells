@@ -25,13 +25,14 @@ private:
 	void free();
 	
 	void move(int x, int y);
+	void move(direction dir);
 public:
 	State();
 	State(const State& rhs);
 	State& operator=(const State & rhs);
 	~State();
 
-	void shuffle();
+	void shuffle(int countOfmoving);
 	bool const operator==(const State & rhs);
 	State* movePart(direction move);
 	bool const isCorrect();
@@ -92,7 +93,7 @@ State& State::operator=(const State& rhs)
 
 void State::move(int x, int y)
 {
-	if( freeCell.i + x > 2 || freeCell.i + x < 0 || freeCell.j + y > 2 || freeCell.j + y < 0){
+	if(x != 0 && y != 0 || freeCell.i + x > 2 || freeCell.i + x < 0 || freeCell.j + y > 2 || freeCell.j + y < 0){
 		throw std::exception("invalid_move");
 		return;
 	}
@@ -102,6 +103,24 @@ void State::move(int x, int y)
 	cells[freeCell.i + x][freeCell.j + y] = tmp;
 	freeCell.i = freeCell.i + x;
 	freeCell.j = freeCell.j + y;
+}
+
+void State::move(direction dir)
+{
+	switch(dir){
+		case(UP)://двигаем снизу	
+			move(1, 0);
+			break;
+		case(DOWN)://двигаем сверху	
+			move(-1, 0);
+			break;
+		case(LEFT)://двигаем справа	
+			move(0, 1);
+			break;
+		case(RIGHT)://двигаем слева	
+			move(0, -1);
+			break;
+	}
 }
 
 bool const State::operator==(const State& s) 
@@ -127,26 +146,12 @@ void const State::Print()
 	cout << endl;
 }
 
-void State::shuffle()
+void State::shuffle(int countOfmoving = 10)
 {
-	int mixes = 10;
-	for (int k = 0; k < mixes; k++)
-	{
-		int i1 = rand()%3;
-		int j1 = rand()%3;
-		int i2 = rand()%3;
-		int j2 = rand()%3;
-		int tmp = cells[i1][j1];
-		cells[i1][j1] = cells[i2][j2];
-		cells[i2][j2] = tmp;
-	}
-	for (int i = 0; i < 3; i++)
-		for (int j = 0; j < 3; j++)
-			if (cells[i][j] == 0)
-			{
-				freeCell.i = i;
-				freeCell.j = j;
-			}
+	for (int i = 0; i < countOfmoving; i++)
+		try{
+			move((direction)(rand() % 4));
+		}catch(std::exception ex){ }
 }
 
 bool const State::isAnswer()
@@ -165,24 +170,10 @@ bool const State::isCorrect()
 
 
 
-State* State::movePart(direction d)//движение относительно свободной клетки
+State* State::movePart(direction dir)//движение относительно свободной клетки
 {
 	State* res = new State(*this); //*res = *this;
-
-	switch(d){
-		case(UP)://двигаем снизу	
-			res -> move(1, 0);
-			break;
-		case(DOWN)://двигаем сверху	
-			res -> move(-1, 0);
-			break;
-		case(LEFT)://двигаем справа	
-			res -> move(0, 1);
-			break;
-		case(RIGHT)://двигаем слева	
-			res -> move(0, -1);
-			break;
-	}
+	res -> move(dir );
 	return res;
 }
 
@@ -244,7 +235,7 @@ int main()
 {
 	srand ( time(NULL) );
 	State start;
-	start.shuffle();
+	start.shuffle(40);
 	cout<<"START:"<<endl;
 	cout<<"Hello my VERY BIG world"<<endl;
 	start.Print();
