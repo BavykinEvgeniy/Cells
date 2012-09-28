@@ -32,23 +32,24 @@ public:
 	State& operator=(const State & rhs);
 	~State();
 
-	void shuffle(int countOfmoving);
-	bool const operator==(const State & rhs);
-	State* movePart(direction move);
+	bool const operator==(const State & rhs);	
 	bool const isCorrect();
 	bool const isAnswer();
 	void const Print();
+
+	State* movePart(direction move);
+	void shuffle(int countOfmoving);
 };
 
 void State::alloc(){
 	cells = new int*[3];
-	for (int i=0; i<3; i++)
+	for (int i = 0; i < 3; i++)
 		cells[i] = new int[3];
 }
 
 void State::copy(const State& s){
-	for (int i=0; i<3; i++)
-		for (int j=0; j<3; j++)
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
 			cells[i][j] = s.cells[i][j];
 	freeCell = s.freeCell;
 }
@@ -63,9 +64,10 @@ State::State()
 {
 	alloc();
 	int count = 1;
-	for (int i=0; i<3; i++)
-		for (int j=0; j<3; j++)
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
 			cells[i][j] = count++;
+
 	freeCell.x = 2;
 	freeCell.y = 2;
 	cells[freeCell.x][freeCell.y] = 0;
@@ -93,7 +95,7 @@ State& State::operator=(const State& rhs)
 
 void State::move(int x, int y)
 {
-	if(x != 0 && y != 0 || freeCell.x + x > 2 || freeCell.x + x < 0 || freeCell.y + y > 2 || freeCell.y + y < 0){
+	if(freeCell.x + x > 2 || freeCell.x + x < 0 || freeCell.y + y > 2 || freeCell.y + y < 0){
 		throw std::exception("invalid_move");
 		return;
 	}
@@ -101,6 +103,7 @@ void State::move(int x, int y)
 	int tmp = cells[freeCell.x][freeCell.y];
 	cells[freeCell.x][freeCell.y] = cells[freeCell.x + x][freeCell.y + y];
 	cells[freeCell.x + x][freeCell.y + y] = tmp;
+
 	freeCell.x = freeCell.x + x;
 	freeCell.y = freeCell.y + y;
 }
@@ -134,9 +137,9 @@ bool const State::operator==(const State& s)
 
 void const State::Print()
 {
-	for (int i=0; i<3; i++)
+	for (int i = 0; i < 3; i++)
 	{
-		for (int j=0; j<3; j++)
+		for (int j = 0; j < 3; j++)
 			if (cells[i][j])
 				cout << cells[i][j] << " ";
 			else
@@ -148,10 +151,13 @@ void const State::Print()
 
 void State::shuffle(int countOfmoving = 10)
 {
-	for (int i = 0; i < countOfmoving; i++)
+	for (int i = 0; i < countOfmoving; i++){
 		try{
 			move((direction)(rand() % 4));
-		}catch(std::exception ex){ }
+		}catch(std::exception ex){
+			//std::cout << ex.what() << std::endl;
+		}
+	}
 }
 
 bool const State::isAnswer()
@@ -162,16 +168,16 @@ bool const State::isAnswer()
 
 bool const State::isCorrect()
 {
-	for (int i=0; i<history.size(); i++)
+	for (int i = 0; i < history.size(); i++)
 		if (history[i] == *this)
 			return false;
 	return true; 
 }
 
-State* State::movePart(direction dir)//äâèæåíèå îòíîñèòåëüíî ñâîáîäíîé êëåòêè
+State* State::movePart(direction dir)//ÓÆÀÑÍÛÉ ÌÅÒÎÄ ÔÓÔÓÔÓ
 {
 	State* res = new State(*this); //*res = *this;
-	res -> move(dir );
+	res-> move(dir);
 	return res;
 }
 
@@ -195,9 +201,9 @@ void Solve(State* start)
 	{
 		Link toStack;
 		State** nextStates = new State*[4];
-		for (int i=0; i<4; i++)
+		for (int i = 0; i < 4; i++)
 			nextStates[i] = tmp.s.movePart( (direction)i);
-		for (int i=0; i<4; i++)
+		for (int i = 0; i < 4; i++)
 			if (nextStates[i] != NULL)
 			{
 				//nextStates[i]->Print();
@@ -209,18 +215,18 @@ void Solve(State* start)
 		head++;
 		if (head<stack.size())
 			tmp = stack[head];
-		for (int i=0; i<4; i++)
+		for (int i = 0; i < 4; i++)
 			delete nextStates[i];
 	}
 	vector <State> path;
 	int count = stack.size() -1;
-	while (count>=0)
+	while (count >= 0)
 	{
 		path.push_back(stack[count].s);
 		count = stack[count].prev;
 	}
 
-	for (int i=path.size()-1; i>=0; i--)
+	for (int i = path.size()-1; i >= 0; i--)
 		path[i].Print();
 
 	/*for (int i=0; i<stack.size(); i++)
@@ -231,11 +237,10 @@ void Solve(State* start)
 
 int main()
 {
-	srand ( time(NULL) );
+	srand (time(NULL));
 	State start;
 	start.shuffle(40);
 	cout<<"START:"<<endl;
-	cout<<"Hello my VERY BIG world"<<endl;
 	start.Print();
 	//Solve(&start);
 	return 0;
