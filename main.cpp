@@ -240,7 +240,7 @@ int main()
 	srand (time(NULL));
 	State start;
 	start.shuffle(40);
-	cout<<"BIG START:"<<endl;
+	cout<<"BIGBIG START:"<<endl;
 	start.Print();
 	//Solve(&start);
 	return 0;
