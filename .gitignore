@@ -34,7 +34,7 @@ Ankh.NoLoad
 #Visual Studio project
 #*.sln
 #*.vcxproj
-*.vcxproj.filters
+#*.vcxproj.filters
 
 #MonoDevelop
 *.pidb
