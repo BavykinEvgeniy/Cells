@@ -9,6 +9,8 @@ struct cell
 	int j;
 };
 
+enum direction {UP, DOWN, LEFT, RIGHT};
+
 class State;
 
 vector <State> history;
@@ -21,6 +23,8 @@ private:
 	void alloc();
 	void copy(const State& s);
 	void free();
+	
+	void move(int x, int y);
 public:
 	State();
 	State(const State& rhs);
@@ -29,7 +33,7 @@ public:
 
 	void Randomize();
 	bool const operator==(const State & rhs);
-	State* movePart(int option);
+	State* movePart(direction move);
 	bool const isCorrect();
 	bool const isAnswer();
 	void const Print();
@@ -86,6 +90,20 @@ State& State::operator=(const State& rhs)
 	return *this;
 }
 
+void State::move(int x, int y)
+{
+	if( freeCell.i + x > 2 || freeCell.i + x < 0 || freeCell.j + y > 2 || freeCell.j + y < 0){
+		throw std::exception("invalid_move");
+		return;
+	}
+
+	int tmp = cells[freeCell.i][freeCell.j];
+	cells[freeCell.i][freeCell.j] = cells[freeCell.i + x][freeCell.j + y];
+	cells[freeCell.i + x][freeCell.j + y] = tmp;
+	freeCell.i = freeCell.i + x;
+	freeCell.j = freeCell.j + y;
+}
+
 bool const State::operator==(const State& s) 
 {
 	for (int i=0; i<3; i++)
@@ -101,18 +119,18 @@ void const State::Print()
 	{
 		for (int j=0; j<3; j++)
 			if (cells[i][j])
-				cout<<cells[i][j]<<" ";
+				cout << cells[i][j] << " ";
 			else
-				cout<<"  ";
-		cout<<endl;
+				cout << "  ";
+		cout << endl;
 	}
-	cout<<endl;
+	cout << endl;
 }
 
 void State::Randomize()
 {
 	int mixes = 10;
-	for (int k=0; k<mixes; k++)
+	for (int k = 0; k < mixes; k++)
 	{
 		int i1 = rand()%3;
 		int j1 = rand()%3;
@@ -122,8 +140,8 @@ void State::Randomize()
 		cells[i1][j1] = cells[i2][j2];
 		cells[i2][j2] = tmp;
 	}
-	for (int i=0; i<3; i++)
-		for (int j=0; j<3; j++)
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
 			if (cells[i][j] == 0)
 			{
 				freeCell.i = i;
@@ -145,65 +163,27 @@ bool const State::isCorrect()
 	return true; 
 }
 
-State* State::movePart(int option)//движение относительно свободной клетки
-{
-	State* res = new State;;
-	*res = *this;
-	if (option == 0)//двигаем снизу
-	{
-		if (res->freeCell.i < 2)
-		{
-			int tmp = res->cells[freeCell.i][freeCell.j];
-			res->cells[freeCell.i][freeCell.j] = res->cells[freeCell.i+1][freeCell.j];
-			res->cells[freeCell.i+1][freeCell.j] = tmp;
-			res->freeCell.i = freeCell.i+1;
-			res->freeCell.j = freeCell.j;
-		}
-		else
-			return NULL;
-	}
-	if (option == 1)//двигаем сверху
-	{
-		if (res->freeCell.i>0)
-		{
-			int tmp = res->cells[freeCell.i][freeCell.j];
-			res->cells[freeCell.i][freeCell.j] = res->cells[freeCell.i-1][freeCell.j];
-			res->cells[freeCell.i-1][freeCell.j] = tmp;
-			res->freeCell.i = freeCell.i-1;
-			res->freeCell.j = freeCell.j;
-		}
-		else
-			return NULL;
-	}
-	if (option == 2)//двигаем справа
-	{
-		if (res->freeCell.j<2)
-		{
-			int tmp = res->cells[freeCell.i][freeCell.j];
-			res->cells[freeCell.i][freeCell.j] = res->cells[freeCell.i][freeCell.j+1];
-			res->cells[freeCell.i][freeCell.j+1] = tmp;
-			res->freeCell.i = freeCell.i;
-			res->freeCell.j = freeCell.j+1;
-		}
-		else
-			return NULL;
-	}
-	if (option == 3)//двигаем слева
-	{
-		if (res->freeCell.j>0)
-		{
-			int tmp = res->cells[freeCell.i][freeCell.j];
-			res->cells[freeCell.i][freeCell.j] = res->cells[freeCell.i][freeCell.j-1];
-			res->cells[freeCell.i][freeCell.j-1] = tmp;
-			res->freeCell.i = freeCell.i;
-			res->freeCell.j = freeCell.j-1;
-		}
-		else
-			return NULL;
-	}
-	if (!res->isCorrect())
-		return NULL;
 
+
+State* State::movePart(direction d)//движение относительно свободной клетки
+{
+	State* res = new State;
+	*res = *this;
+
+	switch(d){
+		case(UP)://двигаем снизу	
+			res -> move(1, 0);
+			break;
+		case(DOWN)://двигаем сверху	
+			res -> move(-1, 0);
+			break;
+		case(LEFT)://двигаем справа	
+			res -> move(0, 1);
+			break;
+		case(RIGHT)://двигаем слева	
+			res -> move(1, 0);
+			break;
+	}
 	return res;
 }
 
@@ -228,7 +208,7 @@ void Solve(State* start)
 		Link toStack;
 		State** nextStates = new State*[4];
 		for (int i=0; i<4; i++)
-			nextStates[i] = tmp.s.movePart(i);
+			nextStates[i] = tmp.s.movePart( (direction)i);
 		for (int i=0; i<4; i++)
 			if (nextStates[i] != NULL)
 			{
