@@ -31,7 +31,7 @@ public:
 	State& operator=(const State & rhs);
 	~State();
 
-	void Randomize();
+	void shuffle();
 	bool const operator==(const State & rhs);
 	State* movePart(direction move);
 	bool const isCorrect();
@@ -127,7 +127,7 @@ void const State::Print()
 	cout << endl;
 }
 
-void State::Randomize()
+void State::shuffle()
 {
 	int mixes = 10;
 	for (int k = 0; k < mixes; k++)
@@ -167,8 +167,7 @@ bool const State::isCorrect()
 
 State* State::movePart(direction d)//движение относительно свободной клетки
 {
-	State* res = new State;
-	*res = *this;
+	State* res = new State(*this); //*res = *this;
 
 	switch(d){
 		case(UP)://двигаем снизу	
@@ -181,7 +180,7 @@ State* State::movePart(direction d)//движение относительно свободной клетки
 			res -> move(0, 1);
 			break;
 		case(RIGHT)://двигаем слева	
-			res -> move(1, 0);
+			res -> move(0, -1);
 			break;
 	}
 	return res;
@@ -245,7 +244,7 @@ int main()
 {
 	srand ( time(NULL) );
 	State start;
-	start.Randomize();
+	start.shuffle();
 	cout<<"START:"<<endl;
 	cout<<"Hello my VERY BIG world"<<endl;
 	start.Print();
