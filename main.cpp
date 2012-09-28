@@ -19,6 +19,7 @@ private:
 	cell freeCell;
 
 	void alloc();
+	void copy(const State& s);
 	void free();
 public:
 	State();
@@ -39,6 +40,13 @@ void State::alloc(){
 		cells[i] = new int[3];
 }
 
+void State::copy(const State& s){
+	for (int i=0; i<3; i++)
+		for (int j=0; j<3; j++)
+			cells[i][j] = s.cells[i][j];
+	freeCell = s.freeCell;
+}
+
 void State::free(){
 	for (int i=0; i<3; i++)
 		delete [] cells[i];
@@ -57,14 +65,10 @@ State::State()
 	cells[freeCell.i][freeCell.j] = 0;
 }
 
-State::State(const State& s)
+State::State(const State& rhs)
 {
 	alloc();
-	for (int i=0; i<3; i++)
-		for (int j=0; j<3; j++)
-			cells[i][j] = s.cells[i][j];
-	freeCell.i = s.freeCell.i;
-	freeCell.j = s.freeCell.j;
+	copy(rhs);
 }
 
 State::~State()
@@ -72,16 +76,12 @@ State::~State()
 	free();
 }
 
-State& State::operator =(const State& s)
+State& State::operator =(const State& rhs)
 {
-	if(this == &s)
+	if(this == &rhs)
 		return *this;
 
-	for (int i=0; i<3; i++)
-		for (int j=0; j<3; j++)
-			cells[i][j] = s.cells[i][j];
-	freeCell.i = s.freeCell.i;
-	freeCell.j = s.freeCell.j;
+	copy(rhs);
 	return *this;
 }
 
