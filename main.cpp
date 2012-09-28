@@ -266,7 +266,7 @@ int main()
 	State start;
 	start.Randomize();
 	cout<<"START:"<<endl;
-	cout<<"Hello world"<<endl;
+	cout<<"Hello my BIG world"<<endl;
 	start.Print();
 	//Solve(&start);
 	return 0;
