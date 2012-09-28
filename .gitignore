@@ -32,9 +32,9 @@ obj/
 Ankh.NoLoad
 
 #Visual Studio project
-*.sln
-*.vcxproj
-*.vcxproj.filters
+#*.sln
+#*.vcxproj
+#*.vcxproj.filters
 
 #MonoDevelop
 *.pidb
