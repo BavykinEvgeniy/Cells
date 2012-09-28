@@ -18,9 +18,11 @@ private:
 	int** cells;
 	cell freeCell;
 
+	void alloc();
+	void free();
 public:
 	State();
-	State(const State& s);
+	State(const State& s);	
 	void Randomize();
 	State& operator=(const State & s);
 	bool operator==(const State & s);
@@ -31,11 +33,21 @@ public:
 	~State();
 };
 
-State::State()
-{
+void State::alloc(){
 	cells = new int*[3];
 	for (int i=0; i<3; i++)
 		cells[i] = new int[3];
+}
+
+void State::free(){
+	for (int i=0; i<3; i++)
+		delete [] cells[i];
+	delete [] cells;
+}
+
+State::State()
+{
+	alloc();
 	int count = 1;
 	for (int i=0; i<3; i++)
 		for (int j=0; j<3; j++)
@@ -47,14 +59,17 @@ State::State()
 
 State::State(const State& s)
 {
-	cells = new int*[3];
-	for (int i=0; i<3; i++)
-		cells[i] = new int[3];
+	alloc();
 	for (int i=0; i<3; i++)
 		for (int j=0; j<3; j++)
 			cells[i][j] = s.cells[i][j];
 	freeCell.i = s.freeCell.i;
 	freeCell.j = s.freeCell.j;
+}
+
+State::~State()
+{
+	free();
 }
 
 State& State::operator =(const State& s)
@@ -189,13 +204,6 @@ State* State::movePart(int option)//движение относительно свободной клетки
 		return NULL;
 
 	return res;
-}
-
-State::~State()
-{
-	for (int i=0; i<3; i++)
-		delete [] cells[i];
-	delete [] cells;
 }
 
 struct Link{
