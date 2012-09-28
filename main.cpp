@@ -15,8 +15,9 @@ vector <State> history;
 
 class State{
 private:
-	int** state;
+	int** cells;
 	cell freeCell;
+
 public:
 	State();
 	State(const State& s);
@@ -32,26 +33,26 @@ public:
 
 State::State()
 {
-	state = new int*[3];
+	cells = new int*[3];
 	for (int i=0; i<3; i++)
-		state[i] = new int[3];
+		cells[i] = new int[3];
 	int count = 1;
 	for (int i=0; i<3; i++)
 		for (int j=0; j<3; j++)
-			state[i][j] = count++;
+			cells[i][j] = count++;
 	freeCell.i = 2;
 	freeCell.j = 2;
-	state[freeCell.i][freeCell.j] = 0;
+	cells[freeCell.i][freeCell.j] = 0;
 }
 
 State::State(const State& s)
 {
-	state = new int*[3];
+	cells = new int*[3];
 	for (int i=0; i<3; i++)
-		state[i] = new int[3];
+		cells[i] = new int[3];
 	for (int i=0; i<3; i++)
 		for (int j=0; j<3; j++)
-			state[i][j] = s.state[i][j];
+			cells[i][j] = s.cells[i][j];
 	freeCell.i = s.freeCell.i;
 	freeCell.j = s.freeCell.j;
 }
@@ -63,7 +64,7 @@ State& State::operator =(const State& s)
 
 	for (int i=0; i<3; i++)
 		for (int j=0; j<3; j++)
-			state[i][j] = s.state[i][j];
+			cells[i][j] = s.cells[i][j];
 	freeCell.i = s.freeCell.i;
 	freeCell.j = s.freeCell.j;
 	return *this;
@@ -73,7 +74,7 @@ bool State::operator ==(const State& s)
 {
 	for (int i=0; i<3; i++)
 		for (int j=0; j<3; j++)
-			if (state[i][j] != s.state[i][j])
+			if (cells[i][j] != s.cells[i][j])
 				return false;
 	return true;
 }
@@ -83,8 +84,8 @@ void const State::Print()
 	for (int i=0; i<3; i++)
 	{
 		for (int j=0; j<3; j++)
-			if (state[i][j])
-				cout<<state[i][j]<<" ";
+			if (cells[i][j])
+				cout<<cells[i][j]<<" ";
 			else
 				cout<<"  ";
 		cout<<endl;
@@ -101,13 +102,13 @@ void State::Randomize()
 		int j1 = rand()%3;
 		int i2 = rand()%3;
 		int j2 = rand()%3;
-		int tmp = state[i1][j1];
-		state[i1][j1] = state[i2][j2];
-		state[i2][j2] = tmp;
+		int tmp = cells[i1][j1];
+		cells[i1][j1] = cells[i2][j2];
+		cells[i2][j2] = tmp;
 	}
 	for (int i=0; i<3; i++)
 		for (int j=0; j<3; j++)
-			if (state[i][j] == 0)
+			if (cells[i][j] == 0)
 			{
 				freeCell.i = i;
 				freeCell.j = j;
@@ -136,9 +137,9 @@ State* State::movePart(int option)//движение относительно свободной клетки
 	{
 		if (res->freeCell.i < 2)
 		{
-			int tmp = res->state[freeCell.i][freeCell.j];
-			res->state[freeCell.i][freeCell.j] = res->state[freeCell.i+1][freeCell.j];
-			res->state[freeCell.i+1][freeCell.j] = tmp;
+			int tmp = res->cells[freeCell.i][freeCell.j];
+			res->cells[freeCell.i][freeCell.j] = res->cells[freeCell.i+1][freeCell.j];
+			res->cells[freeCell.i+1][freeCell.j] = tmp;
 			res->freeCell.i = freeCell.i+1;
 			res->freeCell.j = freeCell.j;
 		}
@@ -149,9 +150,9 @@ State* State::movePart(int option)//движение относительно свободной клетки
 	{
 		if (res->freeCell.i>0)
 		{
-			int tmp = res->state[freeCell.i][freeCell.j];
-			res->state[freeCell.i][freeCell.j] = res->state[freeCell.i-1][freeCell.j];
-			res->state[freeCell.i-1][freeCell.j] = tmp;
+			int tmp = res->cells[freeCell.i][freeCell.j];
+			res->cells[freeCell.i][freeCell.j] = res->cells[freeCell.i-1][freeCell.j];
+			res->cells[freeCell.i-1][freeCell.j] = tmp;
 			res->freeCell.i = freeCell.i-1;
 			res->freeCell.j = freeCell.j;
 		}
@@ -162,9 +163,9 @@ State* State::movePart(int option)//движение относительно свободной клетки
 	{
 		if (res->freeCell.j<2)
 		{
-			int tmp = res->state[freeCell.i][freeCell.j];
-			res->state[freeCell.i][freeCell.j] = res->state[freeCell.i][freeCell.j+1];
-			res->state[freeCell.i][freeCell.j+1] = tmp;
+			int tmp = res->cells[freeCell.i][freeCell.j];
+			res->cells[freeCell.i][freeCell.j] = res->cells[freeCell.i][freeCell.j+1];
+			res->cells[freeCell.i][freeCell.j+1] = tmp;
 			res->freeCell.i = freeCell.i;
 			res->freeCell.j = freeCell.j+1;
 		}
@@ -175,9 +176,9 @@ State* State::movePart(int option)//движение относительно свободной клетки
 	{
 		if (res->freeCell.j>0)
 		{
-			int tmp = res->state[freeCell.i][freeCell.j];
-			res->state[freeCell.i][freeCell.j] = res->state[freeCell.i][freeCell.j-1];
-			res->state[freeCell.i][freeCell.j-1] = tmp;
+			int tmp = res->cells[freeCell.i][freeCell.j];
+			res->cells[freeCell.i][freeCell.j] = res->cells[freeCell.i][freeCell.j-1];
+			res->cells[freeCell.i][freeCell.j-1] = tmp;
 			res->freeCell.i = freeCell.i;
 			res->freeCell.j = freeCell.j-1;
 		}
@@ -193,8 +194,8 @@ State* State::movePart(int option)//движение относительно свободной клетки
 State::~State()
 {
 	for (int i=0; i<3; i++)
-		delete [] state[i];
-	delete [] state;
+		delete [] cells[i];
+	delete [] cells;
 }
 
 struct Link{
