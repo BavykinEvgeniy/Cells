@@ -5,8 +5,8 @@ using namespace std;
 
 struct cell
 {
-	int i;
-	int j;
+	int x;
+	int y;
 };
 
 enum direction {UP, DOWN, LEFT, RIGHT};
@@ -66,9 +66,9 @@ State::State()
 	for (int i=0; i<3; i++)
 		for (int j=0; j<3; j++)
 			cells[i][j] = count++;
-	freeCell.i = 2;
-	freeCell.j = 2;
-	cells[freeCell.i][freeCell.j] = 0;
+	freeCell.x = 2;
+	freeCell.y = 2;
+	cells[freeCell.x][freeCell.y] = 0;
 }
 
 State::State(const State& rhs)
@@ -93,16 +93,16 @@ State& State::operator=(const State& rhs)
 
 void State::move(int x, int y)
 {
-	if(x != 0 && y != 0 || freeCell.i + x > 2 || freeCell.i + x < 0 || freeCell.j + y > 2 || freeCell.j + y < 0){
+	if(x != 0 && y != 0 || freeCell.x + x > 2 || freeCell.x + x < 0 || freeCell.y + y > 2 || freeCell.y + y < 0){
 		throw std::exception("invalid_move");
 		return;
 	}
 
-	int tmp = cells[freeCell.i][freeCell.j];
-	cells[freeCell.i][freeCell.j] = cells[freeCell.i + x][freeCell.j + y];
-	cells[freeCell.i + x][freeCell.j + y] = tmp;
-	freeCell.i = freeCell.i + x;
-	freeCell.j = freeCell.j + y;
+	int tmp = cells[freeCell.x][freeCell.y];
+	cells[freeCell.x][freeCell.y] = cells[freeCell.x + x][freeCell.y + y];
+	cells[freeCell.x + x][freeCell.y + y] = tmp;
+	freeCell.x = freeCell.x + x;
+	freeCell.y = freeCell.y + y;
 }
 
 void State::move(direction dir)
@@ -167,8 +167,6 @@ bool const State::isCorrect()
 			return false;
 	return true; 
 }
-
-
 
 State* State::movePart(direction dir)//движение относительно свободной клетки
 {
