@@ -23,15 +23,16 @@ private:
 	void free();
 public:
 	State();
-	State(const State& s);	
+	State(const State& rhs);
+	State& operator=(const State & rhs);
+	~State();
+
 	void Randomize();
-	State& operator=(const State & s);
-	bool operator==(const State & s);
+	bool const operator==(const State & rhs);
 	State* movePart(int option);
 	bool const isCorrect();
 	bool const isAnswer();
 	void const Print();
-	~State();
 };
 
 void State::alloc(){
@@ -76,7 +77,7 @@ State::~State()
 	free();
 }
 
-State& State::operator =(const State& rhs)
+State& State::operator=(const State& rhs)
 {
 	if(this == &rhs)
 		return *this;
@@ -85,7 +86,7 @@ State& State::operator =(const State& rhs)
 	return *this;
 }
 
-bool State::operator ==(const State& s) 
+bool const State::operator==(const State& s) 
 {
 	for (int i=0; i<3; i++)
 		for (int j=0; j<3; j++)
