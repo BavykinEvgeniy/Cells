@@ -1,4 +1,5 @@
 #include <vector>
+#include <set>
 #include <iostream>
 #include <time.h>
 using namespace std;
@@ -11,35 +12,35 @@ struct cell
 
 enum direction {UP, DOWN, LEFT, RIGHT};
 
-class State;
-
-vector <State> history;
-
 class State{
 private:
 	int** cells;
 	cell freeCell;
 
 	void alloc();
-	void copy(const State& s);
+	void copy(const State& rhs);
 	void free();
 	
-	void move(int x, int y);
-	void move(direction dir);
+	bool move(int x, int y);
+	bool move(direction dir);
 public:
 	State();
 	State(const State& rhs);
-	State& operator=(const State & rhs);
+	State& operator=(const State& rhs);
 	~State();
 
-	bool const operator==(const State & rhs);	
-	bool const isCorrect();
-	bool const isAnswer();
-	void const Print();
+	bool operator==(const State& rhs) const;
+	bool operator<(const State& rhs) const;
+	bool isCorrect() const;
+	bool isAnswer() const;
+	void Print() const;
 
 	State* movePart(direction move);
 	void shuffle(int countOfmoving);
+	//friend bool operator<(const State& lhs, const State& rhs);
 };
+
+set<State> history;
 
 void State::alloc(){
 	cells = new int*[3];
@@ -55,7 +56,7 @@ void State::copy(const State& s){
 }
 
 void State::free(){
-	for (int i=0; i<3; i++)
+	for (int i = 0; i < 3; i++)
 		delete [] cells[i];
 	delete [] cells;
 }
@@ -79,11 +80,6 @@ State::State(const State& rhs)
 	copy(rhs);
 }
 
-State::~State()
-{
-	free();
-}
-
 State& State::operator=(const State& rhs)
 {
 	if(this == &rhs)
@@ -93,11 +89,15 @@ State& State::operator=(const State& rhs)
 	return *this;
 }
 
-void State::move(int x, int y)
+State::~State()
+{
+	free();
+}
+
+bool State::move(int x, int y)
 {
 	if(freeCell.x + x > 2 || freeCell.x + x < 0 || freeCell.y + y > 2 || freeCell.y + y < 0){
-		throw std::exception("invalid_move");
-		return;
+		return false;
 	}
 
 	int tmp = cells[freeCell.x][freeCell.y];
@@ -106,36 +106,66 @@ void State::move(int x, int y)
 
 	freeCell.x = freeCell.x + x;
 	freeCell.y = freeCell.y + y;
+	return true;
 }
 
-void State::move(direction dir)
+bool State::move(direction dir) 
 {
 	switch(dir){
 		case(UP)://äâèãàåì ñíèçó	
-			move(1, 0);
+			return move(1, 0);
 			break;
 		case(DOWN)://äâèãàåì ñâåðõó	
-			move(-1, 0);
+			return move(-1, 0);
 			break;
 		case(LEFT)://äâèãàåì ñïðàâà	
-			move(0, 1);
+			return move(0, 1);
 			break;
 		case(RIGHT)://äâèãàåì ñëåâà	
-			move(0, -1);
+			return move(0, -1);
 			break;
+		default:
+			return false;
 	}
 }
 
-bool const State::operator==(const State& s) 
+int countOfSteps = 0;
+
+State* State::movePart(direction dir)//ÓÆÀÑÍÛÉ ÌÅÒÎÄ ÔÓÔÓÔÓ
 {
-	for (int i=0; i<3; i++)
-		for (int j=0; j<3; j++)
-			if (cells[i][j] != s.cells[i][j])
+	countOfSteps++;
+	State* res = new State(*this); //*res = *this;
+	if(res->move(dir) && res->isCorrect())
+		return res;
+	return NULL;
+}
+
+void State::shuffle(int countOfmoving = 10)
+{
+	for (int i = 0; i < countOfmoving; i++){
+		move((direction)(rand() % 4));		
+	}
+}
+
+bool State::operator==(const State& rhs) const 
+{
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			if (cells[i][j] != rhs.cells[i][j])
 				return false;
 	return true;
 }
 
-void const State::Print()
+bool State::operator<(const State& rhs) const
+{
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			if (cells[i][j] != rhs.cells[i][j])
+				return cells[i][j] < rhs.cells[i][j];
+	return false;
+}
+
+void State::Print() const
 {
 	for (int i = 0; i < 3; i++)
 	{
@@ -149,36 +179,19 @@ void const State::Print()
 	cout << endl;
 }
 
-void State::shuffle(int countOfmoving = 10)
-{
-	for (int i = 0; i < countOfmoving; i++){
-		try{
-			move((direction)(rand() % 4));
-		}catch(std::exception ex){
-			//std::cout << ex.what() << std::endl;
-		}
-	}
-}
-
-bool const State::isAnswer()
+bool State::isAnswer() const
 {
 	State etalon;
 	return *this == etalon;
 }
 
-bool const State::isCorrect()
+bool State::isCorrect() const
 {
-	for (int i = 0; i < history.size(); i++)
+	/*for (unsigned int i = 0; i < history.size(); i++)
 		if (history[i] == *this)
 			return false;
-	return true; 
-}
-
-State* State::movePart(direction dir)//ÓÆÀÑÍÛÉ ÌÅÒÎÄ ÔÓÔÓÔÓ
-{
-	State* res = new State(*this); //*res = *this;
-	res-> move(dir);
-	return res;
+	return true;*/ 
+	return history.find(*this) == history.end();
 }
 
 struct Link{
@@ -186,15 +199,18 @@ struct Link{
 	int prev;
 };
 
+
+
 void Solve(State* start)
 {
 	Link tmp;
 	tmp.s = *start;
 	tmp.prev = -1;
-	vector <Link> stack;
+	vector<Link> stack;
 	stack.push_back(tmp);
-	history.push_back(*start);
-	int head = 0;
+	//history.push_back(*start);
+	history.insert(*start);
+	unsigned int head = 0;
 	/****/
 
 	while (!tmp.s.isAnswer())
@@ -202,7 +218,7 @@ void Solve(State* start)
 		Link toStack;
 		State** nextStates = new State*[4];
 		for (int i = 0; i < 4; i++)
-			nextStates[i] = tmp.s.movePart( (direction)i);
+			nextStates[i] = tmp.s.movePart((direction)i);
 		for (int i = 0; i < 4; i++)
 			if (nextStates[i] != NULL)
 			{
@@ -210,16 +226,18 @@ void Solve(State* start)
 				toStack.prev = head;
 				toStack.s = *nextStates[i];
 				stack.push_back(toStack);
-				history.push_back(toStack.s);
+				//history.push_back(toStack.s);
+				history.insert(toStack.s);
 			}
 		head++;
-		if (head<stack.size())
+		if (head < stack.size())
 			tmp = stack[head];
 		for (int i = 0; i < 4; i++)
 			delete nextStates[i];
 	}
 	vector <State> path;
-	int count = stack.size() -1;
+
+	int count = head;
 	while (count >= 0)
 	{
 		path.push_back(stack[count].s);
@@ -228,20 +246,38 @@ void Solve(State* start)
 
 	for (int i = path.size()-1; i >= 0; i--)
 		path[i].Print();
-
-	/*for (int i=0; i<stack.size(); i++)
-		stack[i].s.Print();*/
+	cout<<"Length: "<<path.size()-1<<endl;
+		//stack[i].s.Print();
+		
 	/****/
 }
 
 
 int main()
 {
-	srand (time(NULL));
-	State start;
-	start.shuffle(40);
-	cout<<"BIGBIG START:"<<endl;
+	srand((unsigned int)time(NULL));
+	State s1, s2, s3, start;
+
+	/*s1.shuffle(400);
+	s2.shuffle(400);
+	s3.shuffle(400);*/
+	start.shuffle(100000);
+	cout<<"Start:"<<endl;
 	start.Print();
-	//Solve(&start);
+	/*s1.Print();
+	s2.Print();
+	s3.Print();
+
+	if(s1 < s2)
+		std::cout << "s1 < s2" << std::endl;
+
+	if(s2 < s3)
+		std::cout << "s2 < s3" << std::endl;
+	
+	if(s1 < s3)
+		std::cout << "s1 < s3" << std::endl;*/
+
+	Solve(&start);
+	std::cout << countOfSteps << std::endl;
 	return 0;
 }
